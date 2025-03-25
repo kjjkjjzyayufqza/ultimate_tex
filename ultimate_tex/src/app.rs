@@ -130,7 +130,6 @@ pub fn load_files(files: Vec<PathBuf>) -> (Vec<String>, Vec<ImageFileSettings>) 
         .map(|(file, image)| ImageFileSettings::from_image(file.clone(), image))
         .collect();
 
-    println!("Loaded {} files in {:?}", files.len(), start.elapsed());
     (new_thumbnails, new_settings)
 }
 

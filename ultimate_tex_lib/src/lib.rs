@@ -62,11 +62,8 @@ impl ImageFile {
             ImageFile::Image(image) => Ok(image.clone()),
             ImageFile::Dds(dds) => image_dds::image_from_dds(dds, 0).map_err(Into::into),
             ImageFile::Nutexb(nutexb) => {
-                println!("DEBUG: {:?}", nutexb.footer);
-                println!("DEBUG: {:?}", nutexb.data.len());
                 // Use DDS as an intermediate format to handle swizzling.
                 let dds = nutexb.to_dds()?;
-                println!("DEBUG: RUN HERE");
                 image_dds::image_from_dds(&dds, 0).map_err(Into::into)
             }
             ImageFile::Bntx(bntx) => {
@@ -202,7 +199,7 @@ fn bntx_image_format(bntx: &Bntx) -> ImageFormat {
     bntx.image_format().try_into().unwrap()
 }
 
-fn nutexb_image_format(nutexb: &NutexbFile) -> ImageFormat {
+pub fn nutexb_image_format(nutexb: &NutexbFile) -> ImageFormat {
     match nutexb.footer.image_format {
         nutexb::NutexbFormat::R8Unorm => ImageFormat::R8Unorm,
         nutexb::NutexbFormat::R8G8B8A8Unorm => ImageFormat::Rgba8Unorm,
