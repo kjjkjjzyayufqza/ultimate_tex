@@ -11,6 +11,12 @@ Drag files onto the application window or add them with File > Add File(s), sele
 ## ultimate_tex_cli
 A commandline program for converting a single texture file.
 
+### Command Line Options
+- `--format <FORMAT>`: Specify the output image format for files supporting compression (e.g., BC1RgbaUnormSrgb, BC7RgbaUnorm)
+- `--no-mipmaps`: Disable mipmap generation and only include the base mip level
+- `--unique-filename`: Ensure output filename is unique by adding a numbered suffix if the file already exists (only applies to image formats like PNG, JPEG, etc.)
+- `<input>.nutexb *.png`: Can use nutexb origin name to export file
+
 ### Examples
 DDS:  
 `ultimate_tex_cli cat.jpeg cat.dds --format BC1RgbaUnormSrgb`  
@@ -23,6 +29,9 @@ Nutexb:
 Bntx:  
 `ultimate_tex_cli chara_0_captain_01.bntx img.png`  
 `ultimate_tex_cli img.png chara_0_captain_01.bntx --format BC7RgbaUnorm --no-mipmaps`  
+
+Image with unique filename:  
+`ultimate_tex_cli texture.dds output.png --unique-filename`  
 
 ## ultimate_tex_lib
 A library for conversion functionality shared between the GUI and CLI programs.

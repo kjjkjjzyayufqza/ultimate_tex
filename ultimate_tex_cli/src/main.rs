@@ -26,6 +26,12 @@ struct Args {
         help = "Disable mipmap generation and only include the base mip level"
     )]
     no_mipmaps: bool,
+
+    #[arg(
+        long = "unique-filename",
+        help = "Ensure output filename is unique by adding a numbered suffix if the file already exists"
+    )]
+    unique_filename: bool,
 }
 
 fn main() {
@@ -95,10 +101,14 @@ fn main() {
         "dds" => input_image
             .save_dds(output, format, quality, mipmaps)
             .unwrap(),
-        // For image formats, use our function to ensure unique filenames
+        // For image formats, use our function to ensure unique filenames if requested
         _ => {
-            let unique_path = ensure_unique_filename(output);
-            input_image.save_image(&unique_path).unwrap()
+            let final_path = if args.unique_filename {
+                ensure_unique_filename(output)
+            } else {
+                output.to_path_buf()
+            };
+            input_image.save_image(&final_path).unwrap()
         },
     };
 
