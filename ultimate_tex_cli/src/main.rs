@@ -32,6 +32,12 @@ struct Args {
         help = "Ensure output filename is unique by adding a numbered suffix if the file already exists"
     )]
     unique_filename: bool,
+
+    #[arg(
+        long = "nutexb-name",
+        help = "Custom name to use in the nutexb footer string (default: output filename without extension)"
+    )]
+    nutexb_name: Option<String>,
 }
 
 fn main() {
@@ -80,9 +86,25 @@ fn main() {
     
     match output_extension.as_str() {
         "nutexb" => {
+            // Get the name for the nutexb footer
+            let name = args.nutexb_name.unwrap_or_else(|| {
+                output
+                    .with_extension("")
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+                    .to_string()
+            });
+
+            // Use custom name for the nutexb footer
             input_image
                 .save_nutexb(output, format, quality, mipmaps)
                 .unwrap();
+
+            if let Ok(mut nutexb) = NutexbFile::read_from_file(output) {
+                nutexb.footer.string = name.as_str().into();
+                nutexb.write_to_file(output).unwrap();
+            }
             // Print NutexbFooter info for output file
             if let Ok(nutexb) = NutexbFile::read_from_file(output) {
                 println!("\nNutexbFooter Information:");

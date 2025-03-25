@@ -15,7 +15,8 @@ A commandline program for converting a single texture file.
 - `--format <FORMAT>`: Specify the output image format for files supporting compression (e.g., BC1RgbaUnormSrgb, BC7RgbaUnorm)
 - `--no-mipmaps`: Disable mipmap generation and only include the base mip level
 - `--unique-filename`: Ensure output filename is unique by adding a numbered suffix if the file already exists (only applies to image formats like PNG, JPEG, etc.)
-- `<input>.nutexb *.png`: Can use nutexb origin name to export file
+- `ultimate_tex_cli <input>.nutexb *.png`: Can use nutexb origin name to export file
+- `ultimate_tex_cli input.png output.nutexb --nutexb-name==<string>`: Can use custom name for convert nutexb file
 
 ### Examples
 DDS:  
