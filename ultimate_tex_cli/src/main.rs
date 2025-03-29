@@ -4,14 +4,28 @@ use clap::Parser;
 use image_dds::Mipmaps;
 use ultimate_tex_lib::{ImageFile, NutexbFile};
 
+fn print_nutexb_info(nutexb: &NutexbFile) {
+    println!("\nNutexbFooter Information:");
+    println!("Name: {}", nutexb.footer.string);
+    println!("Dimensions: {}x{}x{}", nutexb.footer.width, nutexb.footer.height, nutexb.footer.depth);
+    println!("NutexbFormat: {:?}", nutexb.footer.image_format);
+    println!("ImageFormat: {:?}", ultimate_tex_lib::nutexb_image_format(nutexb));
+    println!("Mipmap Count: {}", nutexb.footer.mipmap_count);
+    println!("Layer Count: {}", nutexb.footer.layer_count);
+    println!("Data Size: {} bytes", nutexb.footer.data_size);
+}
+
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Smash Ultimate texture converter", long_about = None)]
 struct Args {
     #[arg(help = "The input image file to convert")]
     input: String,
 
-    #[arg(help = "The output converted image file")]
-    output: String,
+    #[arg(help = "The output converted image file", required_unless_present = "info")]
+    output: Option<String>,
+
+    #[arg(short = 'i', long = "info", help = "Print NutexbFooter information only")]
+    info: bool,
 
     // TODO: make this a value enum to show possible image formats?
     #[arg(
@@ -43,21 +57,34 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let input = Path::new(&args.input);
+
+    // If info mode and input is nutexb, just print the info and exit
+    if args.info {
+        if input.extension().map_or(false, |ext| ext.to_string_lossy().to_lowercase() == "nutexb") {
+            if let Ok(nutexb) = NutexbFile::read_from_file(input) {
+                print_nutexb_info(&nutexb);
+            }
+            return;
+        } else {
+            eprintln!("Error: --info can only be used with .nutexb files");
+            std::process::exit(1);
+        }
+    }
     
     // Process output path to handle * replacement
-    let output_path_str = if args.output.contains('*') {
+    let output_path_str = if args.output.as_ref().unwrap().contains('*') {
         // Only attempt to replace * if input is a nutexb file
         if input.extension().map_or(false, |ext| ext.to_string_lossy().to_lowercase() == "nutexb") {
             // Read the nutexb file to get the internal name
             let nutexb = NutexbFile::read_from_file(input).unwrap();
             let internal_name = nutexb.footer.string.to_string();
-            args.output.replace('*', &internal_name)
+            args.output.as_ref().unwrap().replace('*', &internal_name)
         } else {
             // If not a nutexb file, keep the * as is
-            args.output.clone()
+            args.output.as_ref().unwrap().clone()
         }
     } else {
-        args.output.clone()
+        args.output.as_ref().unwrap().clone()
     };
     
     let output = Path::new(&output_path_str);
@@ -107,14 +134,7 @@ fn main() {
             }
             // Print NutexbFooter info for output file
             if let Ok(nutexb) = NutexbFile::read_from_file(output) {
-                println!("\nNutexbFooter Information:");
-                println!("Name: {}", nutexb.footer.string);
-                println!("Dimensions: {}x{}x{}", nutexb.footer.width, nutexb.footer.height, nutexb.footer.depth);
-                println!("NutexbFormat: {:?}", nutexb.footer.image_format);
-                println!("ImageFormat: {:?}", ultimate_tex_lib::nutexb_image_format(&nutexb));
-                println!("Mipmap Count: {}", nutexb.footer.mipmap_count);
-                println!("Layer Count: {}", nutexb.footer.layer_count);
-                println!("Data Size: {} bytes", nutexb.footer.data_size);
+                print_nutexb_info(&nutexb);
             }
         }
         "bntx" => input_image
@@ -137,13 +157,7 @@ fn main() {
     // Print NutexbFooter info if input was a nutexb file
     if input.extension().map_or(false, |ext| ext.to_string_lossy().to_lowercase() == "nutexb") {
         if let Ok(nutexb) = NutexbFile::read_from_file(input) {
-            println!("\nInput NutexbFooter Information:");
-            println!("Name: {}", nutexb.footer.string);
-            println!("Dimensions: {}x{}x{}", nutexb.footer.width, nutexb.footer.height, nutexb.footer.depth);
-            println!("Format: {:?}", ultimate_tex_lib::nutexb_image_format(&nutexb));
-            println!("Mipmap Count: {}", nutexb.footer.mipmap_count);
-            println!("Layer Count: {}", nutexb.footer.layer_count);
-            println!("Data Size: {} bytes", nutexb.footer.data_size);
+            print_nutexb_info(&nutexb);
         }
     }
 }
