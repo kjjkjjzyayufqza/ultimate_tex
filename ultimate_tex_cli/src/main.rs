@@ -13,6 +13,7 @@ fn print_nutexb_info(nutexb: &NutexbFile) {
     println!("Mipmap Count: {}", nutexb.footer.mipmap_count);
     println!("Layer Count: {}", nutexb.footer.layer_count);
     println!("Data Size: {} bytes", nutexb.footer.data_size);
+    println!("Version: {:?}", nutexb.footer.version);
 }
 
 #[derive(Parser, Debug)]
